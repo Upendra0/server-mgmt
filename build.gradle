@@ -1,0 +1,216 @@
+description ="""
+Project name: ${project.name}
+"""
+
+allprojects {
+apply plugin: 'com.jfrog.artifactory'
+apply plugin: 'java'
+apply plugin: 'maven-publish'
+apply plugin: 'maven'
+}
+
+sourceCompatibility = '11'
+targetCompatibility = '11'
+
+configurations {
+    externalLibs
+}
+
+println "-----------------${project.name}------------------"
+
+buildscript {
+  repositories {
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    } 
+  } 
+  dependencies {
+    classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.7.5"
+  } 
+} 
+
+repositories {
+
+    maven {  
+        url "${artifactory_contextUrl}"
+          metadataSources {
+                 mavenPom()
+                 artifact()
+          }
+	}
+	      
+ 	maven {
+        url "${artifactory_contextUrl}/jcenter"
+        credentials {
+            username "${artifactory_user}"
+            password "${artifactory_password}"
+        }
+    }
+
+   maven {
+        url "${artifactory_contextUrl}/servermgmt"
+        credentials {
+            username "${artifactory_user}"
+            password "${artifactory_password}"
+        }
+        name = "servermgmt"
+    }
+
+   maven {
+        url "${artifactory_contextUrl}/generic-local"
+        credentials {
+            username "${artifactory_user}"
+            password "${artifactory_password}"
+        }
+    }
+
+   maven {
+        url "${artifactory_contextUrl}/elitelibraries"
+        credentials {
+            username "${artifactory_user}"
+            password "${artifactory_password}"
+        }
+    }
+    
+    mavenCentral() 
+        
+} 
+
+version = "7.14.0"
+group = 'com.elitecore'
+
+artifactory {
+
+println "version=-==${version}==============${artifactory_contextUrl}----${project.name}"
+
+    contextUrl = "${artifactory_contextUrl}"
+    publish {
+        repository {
+            repoKey = "servermgmt"
+            username = "${artifactory_user}"
+            password = "${artifactory_password}"
+            maven = true
+
+        }
+        defaults {
+            publications ('mavenjava')
+	}
+		
+            publishArtifacts = true
+	    publishPom = true        
+    }
+}
+
+
+publishing {
+    publications {
+        mavenjava(MavenPublication) {
+
+		from components.java
+        }
+    }
+}
+
+dependencies {
+     // https://mvnrepository.com/artifact/com.jcraft/jsch
+	compile group: 'com.jcraft', name: 'jsch', version: '0.1.54'
+	
+	// https://mvnrepository.com/artifact/ant/ant-jsch
+	compile group: 'ant', name: 'ant-jsch', version: '1.6.1'
+ 
+    compile group: 'commons-net', name: 'commons-net', version: '3.1'
+
+	// https://mvnrepository.com/artifact/commons-io/commons-io
+	compile group: 'commons-io', name: 'commons-io', version: '2.4'
+	
+	//compile group: 'com.elitecore', name: 'http', version: '2.2.1'
+	
+	// https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient
+	compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.2.5'
+	//jfrog.sterlite.com:8081/artifactory/ServerMgmt/com/elitecore/jmxremote/1.0/ja
+	// https://mvnrepository.com/artifact/org.apache.httpcomponents/httpcore
+	compile group: 'org.apache.httpcomponents', name: 'httpcore', version: '4.2.5'
+	// https://mvnrepository.com/artifact/com.sun.jersey/jersey-client
+	compile group: 'com.sun.jersey', name: 'jersey-client', version: '1.9.1'
+	
+	// https://mvnrepository.com/artifact/com.sun.jersey/jersey-core
+	compile group: 'com.sun.jersey', name: 'jersey-core', version: '1.9.1'
+	
+	// https://mvnrepository.com/artifact/com.sun.jersey/jersey-json
+	compile group: 'com.sun.jersey', name: 'jersey-json', version: '1.9.1'
+	
+	// https://mvnrepository.com/artifact/com.sun.jersey/jersey-server
+	compile group: 'com.sun.jersey', name: 'jersey-server', version: '1.9.1'
+	
+	// https://mvnrepository.com/artifact/javax.management/jmxremote
+    //	compile group: 'javax.management', name: 'jmxremote', version: '1.0.1_04' 
+	
+	// https://mvnrepository.com/artifact/log4j/log4j
+	compile group: 'log4j', name: 'log4j', version: '1.2.17'
+
+	// https://mvnrepository.com/artifact/mysql/mysql-connector-java
+	compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.24'
+	
+	// https://mvnrepository.com/artifact/oracle/ojdbc6
+	//compile group: 'oracle', name: 'ojdbc6', version: '11.2.0.3'
+	
+	// https://mvnrepository.com/artifact/com.oracle.database.jdbc/ojdbc8
+    compile group: 'com.oracle.database.jdbc', name: 'ojdbc8', version: '19.8.0.0'
+
+	// https://mvnrepository.com/artifact/org.postgresql/postgresql
+	compile group: 'org.postgresql', name: 'postgresql', version: '9.4.1207.jre6'
+	
+	// https://mvnrepository.com/artifact/com.hazelcast/hazelcast-all
+	compile group: 'com.hazelcast', name: 'hazelcast-all', version: '3.12.2'
+	
+	// https://mvnrepository.com/artifact/com.hazelcast/hazelcast-kubernetes
+    compile (group: 'com.hazelcast', name: 'hazelcast-kubernetes', version: '2.0'){ transitive = false}
+	
+	
+	compile (group: 'com.elitecore', name: 'coreserver', version: "${version}") { transitive = false}
+		
+	//compile group: 'com.elitecore', name: 'jmxremote', version: '1.0'
+
+
+	compile group: 'com.elitecore', name: 'jackson-all', version: '1.9.0'
+}
+
+
+compileJava {
+    options.incremental = true
+    options.fork = true
+    options.failOnError = true
+    options.encoding = 'UTF-8'
+}
+
+sourceSets {
+
+	 main {
+		  java {
+				srcDirs = ['src/main/java']
+		  }
+		  resources {
+				exclude 'startJMXScript/'            	
+		  }
+	}
+}
+
+jar {
+ 	exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA'
+    manifest {
+        attributes "Main-Class": "com.elitecore.jmx.ServerMgmtJMX"
+    }	  
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+task buildServerMgmt {
+
+        dependsOn 'clean'
+        dependsOn 'build'
+        dependsOn 'artifactoryPublish'
+            tasks.findByName('build').mustRunAfter 'clean'
+            tasks.findByName('artifactoryPublish').mustRunAfter 'build'
+
+}

@@ -1,0 +1,15 @@
+Step 1: Checkout the project in eclipse from url :
+Step 2: Check proper jdk referenced to the project or not in build path.
+Step 3: Add Jar in build path from lib folder
+Step 4: Clean the Project
+Step 5: Create run configuration with proper run configuration name with below mentioned VM Arguments
+   Arguments -> VM Arguments 
+		-Dcom.sun.management.jmxremote
+		-Dcom.sun.management.jmxremote.port=1617 
+		-Dcom.sun.management.jmxremote.authenticate=false 
+		-Dcom.sun.management.jmxremote.ssl=false
+	Main -> Main Class
+		com.elitecore.jmx.ServerMgmtJMX
+	Environment -> New
+		CRESTEL_P_ENGINE_HOME = {UPTO REPOSITORY FOLDER}
+Step 6: Run
